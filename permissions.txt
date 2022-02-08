@@ -1,0 +1,33 @@
+while :
+do
+echo ""
+read -r -p "Do you want to add a user to your repository? [y/n] " input
+case $input in
+	[yY][eE][sS]|[yY])
+		read -p "Enter username: " newuser
+		echo "Enter access_level"
+		echo "10 => Guest access"
+		echo "20 => Reporter access"
+		echo "30 => Developer access"
+		echo "40 => Master access"
+		read -p "50 => Owner access # Only valid for groups - " access
+
+		# find out id of the project and user_id
+		id=`curl --header "PRIVATE-TOKEN: $token" https://gitlab.com/api/v3/projects | cut -d , -f1 | cut -d : -f2`
+		user_id=`curl --header "PRIVATE-TOKEN: $token" https://gitlab.com/api/v3/users?username=$newuser | cut -d , -f3 | cut -d : -f2`
+		# add user to gitlab project
+		curl --request POST --header "PRIVATE-TOKEN: $token" --data "user_id=$user_id&access_level=$access" https://gitlab.com/api/v3/projects/$id/members
+		;;
+	[nN][oO]|[nN])
+		echo "As you wish, master."
+		break
+		;;
+	*)
+		echo "Invalid input..."
+		;;
+esac
+done
+
+echo ""
+echo "The created repo is available at following link:"
+echo "https://gitlab.com/$username/$repo_name"
